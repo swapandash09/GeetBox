@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioPlayer = document.getElementById('audioPlayer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const fullPlayPauseBtn = document.getElementById('fullPlayPauseBtn');
-    const miniPrevBtn = document.getElementById('miniPrevBtn');
-    const miniNextBtn = document.getElementById('miniNextBtn');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
@@ -19,22 +17,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const miniPlayer = document.getElementById('miniPlayer');
     const fullPlayer = document.getElementById('fullPlayer');
     const closeFullPlayer = document.getElementById('closeFullPlayer');
+    const miniSongName = document.getElementById('miniSongName');
+    const miniArtist = document.getElementById('miniArtist');
+    const fullSongName = document.getElementById('fullSongName');
+    const fullArtist = document.getElementById('fullArtist');
+    const miniAlbumArt = document.getElementById('miniAlbumArt');
+    const fullAlbumArt = document.getElementById('fullAlbumArt');
 
     let isPlaying = false;
     let isShuffling = false;
     let isRepeating = false;
     let isMuted = false;
+    let currentSongIndex = -1;
 
     window.geetBox = {
-        playSong: (songUrl) => {
+        playSong: (index) => {
+            if (index < 0 || index >= window.geetBoxData.songs.length) return;
+            currentSongIndex = index;
+            const song = window.geetBoxData.songs[index];
+            const songUrl = URL.createObjectURL(song.file);
             audioPlayer.src = songUrl;
-            if (!isPlaying) {
-                audioPlayer.play().then(() => {
-                    isPlaying = true;
-                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    fullPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                }).catch(err => console.error(err));
-            }
+            audioPlayer.play().then(() => {
+                isPlaying = true;
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                fullPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                miniSongName.textContent = song.title || song.file.name;
+                miniArtist.textContent = song.artist || 'Unknown Artist';
+                fullSongName.textContent = song.title || song.file.name;
+                fullArtist.textContent = song.artist || 'Unknown Artist';
+                miniAlbumArt.style.backgroundImage = song.albumArt ? `url(${song.albumArt})` : '';
+                fullAlbumArt.style.backgroundImage = song.albumArt ? `url(${song.albumArt})` : '';
+            }).catch(err => console.error('Playback error:', err));
         },
         togglePlayPause: () => {
             if (isPlaying) {
@@ -47,8 +60,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     isPlaying = true;
                     playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
                     fullPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                }).catch(err => console.error(err));
+                }).catch(err => console.error('Playback error:', err));
             }
+        },
+        playNext: () => {
+            let nextIndex = currentSongIndex + 1;
+            if (nextIndex >= window.geetBoxData.songs.length) {
+                nextIndex = 0; // Loop to start
+            }
+            window.geetBox.playSong(nextIndex);
+        },
+        playPrevious: () => {
+            let prevIndex = currentSongIndex - 1;
+            if (prevIndex < 0) {
+                prevIndex = window.geetBoxData.songs.length - 1; // Loop to end
+            }
+            window.geetBox.playSong(prevIndex);
         },
         seek: (event, progressBar) => {
             const rect = progressBar.getBoundingClientRect();
@@ -57,12 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    playPauseBtn.addEventListener('click', geetBox.togglePlayPause);
-    fullPlayPauseBtn.addEventListener('click', geetBox.togglePlayPause);
-    miniPrevBtn.addEventListener('click', () => console.log('Prev'));
-    miniNextBtn.addEventListener('click', () => console.log('Next'));
-    prevBtn.addEventListener('click', () => console.log('Prev'));
-    nextBtn.addEventListener('click', () => console.log('Next'));
+    playPauseBtn.addEventListener('click', window.geetBox.togglePlayPause);
+    fullPlayPauseBtn.addEventListener('click', window.geetBox.togglePlayPause);
+    nextBtn.addEventListener('click', window.geetBox.playNext);
+    prevBtn.addEventListener('click', window.geetBox.playPrevious);
     shuffleBtn.addEventListener('click', () => isShuffling = !isShuffling);
     repeatBtn.addEventListener('click', () => isRepeating = !isRepeating);
 
@@ -78,7 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
         muteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-off"></i>' : '<i class="fas fa-volume-up"></i>';
     });
 
-    speedSelect.addEventListener('change', () => audioPlayer.playbackRate = parseFloat(speedSelect.value));
+    speedSelect.addEventListener('change', () => {
+        audioPlayer.playbackRate = parseFloat(speedSelect.value);
+    });
 
     audioPlayer.addEventListener('timeupdate', () => {
         const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100 || 0;
@@ -88,14 +115,39 @@ document.addEventListener('DOMContentLoaded', () => {
         duration.textContent = formatTime(audioPlayer.duration);
     });
 
-    miniProgressBar.addEventListener('click', (e) => geetBox.seek(e, miniProgressBar));
-    fullProgressBar.addEventListener('click', (e) => geetBox.seek(e, fullProgressBar));
+    audioPlayer.addEventListener('ended', () => {
+        if (isRepeating) {
+            window.geetBox.playSong(currentSongIndex);
+        } else {
+            window.geetBox.playNext();
+        }
+    });
 
-    miniPlayer.addEventListener('click', () => {
-        if (!event.target.closest('.mini-controls')) fullPlayer.classList.remove('hidden');
+    miniProgressBar.addEventListener('click', (e) => window.geetBox.seek(e, miniProgressBar));
+    fullProgressBar.addEventListener('click', (e) => window.geetBox.seek(e, fullProgressBar));
+
+    miniPlayer.addEventListener('click', (e) => {
+        if (!e.target.closest('.mini-controls')) {
+            fullPlayer.classList.remove('hidden');
+        }
     });
 
     closeFullPlayer.addEventListener('click', () => fullPlayer.classList.add('hidden'));
+
+    // Swipe Gestures for Full Player
+    let touchStartX = 0;
+    let touchEndX = 0;
+    fullPlayer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    fullPlayer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 50) {
+            window.geetBox.playNext(); // Swipe left for next
+        } else if (touchEndX - touchStartX > 50) {
+            window.geetBox.playPrevious(); // Swipe right for previous
+        }
+    });
 
     function formatTime(seconds) {
         if (isNaN(seconds)) return '0:00';
