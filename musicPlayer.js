@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const localSongsList = document.getElementById('localSongsList');
     const recentlyPlayedList = document.getElementById('recentlyPlayedList');
     const queueList = document.getElementById('queueList');
+    const albumsList = document.getElementById('albumsList');
+    const suggestedList = document.getElementById('suggestedList');
     const audioPlayer = document.getElementById('audioPlayer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const fullPlayPauseBtn = document.getElementById('fullPlayPauseBtn');
@@ -25,13 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeFullPlayer = document.getElementById('closeFullPlayer');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const miniPrevBtn = document.getElementById('miniPrevBtn');
+    const miniNextBtn = document.getElementById('miniNextBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
     const repeatBtn = document.getElementById('repeatBtn');
     const volume = document.getElementById('volume');
+    const muteBtn = document.getElementById('muteBtn');
     const speedSelect = document.getElementById('speedSelect');
     const currentTime = document.getElementById('currentTime');
     const duration = document.getElementById('duration');
     const lyricsText = document.getElementById('lyricsText');
+    const likeBtn = document.getElementById('likeBtn');
+    const recentHighlight = document.getElementById('recentHighlight');
+    const highlightSongName = document.getElementById('highlightSongName');
+    const highlightArtist = document.getElementById('highlightArtist');
+    const highlightAlbumArt = document.getElementById('highlightAlbumArt');
 
     // Debugging: Check if elements are found
     if (!audioPlayer) {
@@ -43,9 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSongIndex = 0;
     let isShuffling = false;
     let isRepeating = false;
+    let isMuted = false;
     let recentlyPlayed = JSON.parse(localStorage.getItem('recentlyPlayed')) || [];
     let queue = [];
     let albumArtCache = {};
+    let albumDataCache = {};
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
     // Add Songs Button
     addSongsBtn.addEventListener('click', () => {
@@ -53,25 +66,27 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
     });
 
-    // Extract Album Art
-    function extractAlbumArt(file, callback) {
+    // Extract Album Art and Metadata
+    function extractAlbumData(file, callback) {
         jsmediatags.read(file, {
             onSuccess: (tag) => {
                 const picture = tag.tags.picture;
+                const album = tag.tags.album || 'Unknown Album';
+                let imageUrl = null;
                 if (picture) {
                     const base64String = btoa(
                         picture.data.reduce((data, byte) => data + String.fromCharCode(byte), '')
                     );
-                    const imageUrl = `data:${picture.format};base64,${base64String}`;
+                    imageUrl = `data:${picture.format};base64,${base64String}`;
                     albumArtCache[file.name] = imageUrl;
-                    callback(imageUrl);
-                } else {
-                    callback(null);
                 }
+                albumDataCache[file.name] = { album };
+                callback({ imageUrl, album });
             },
             onError: (error) => {
                 console.error("Error reading metadata:", error);
-                callback(null);
+                albumDataCache[file.name] = { album: 'Unknown Album' };
+                callback({ imageUrl: null, album: 'Unknown Album' });
             }
         });
     }
@@ -86,13 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         songs.forEach(song => {
             queue.push(song);
-            extractAlbumArt(song, (imageUrl) => {
+            extractAlbumData(song, ({ imageUrl, album }) => {
                 if (imageUrl) {
                     albumArtCache[song.name] = imageUrl;
                 }
             });
         });
         loadLocalSongs();
+        loadAlbums();
         loadQueue();
         playSong(currentSongIndex);
     });
@@ -102,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localSongsList.innerHTML = '';
         filteredSongs.forEach((song, index) => {
             const card = document.createElement('div');
-            card.className = 'card';
+            card.className = `card ${currentSongIndex === index ? 'now-playing' : ''}`;
             card.innerHTML = `
                 <div class="album-art" id="albumArt-${index}">🎵</div>
                 <p>${song.name}</p>
@@ -144,6 +160,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 albumArtElement.innerHTML = '';
             }
         });
+
+        // Update Suggested Section (Recently Played Highlight)
+        if (recentlyPlayed.length > 0) {
+            const lastPlayed = recentlyPlayed[0];
+            recentHighlight.classList.remove('hidden');
+            highlightSongName.textContent = lastPlayed.name;
+            highlightArtist.textContent = 'Local File';
+            if (albumArtCache[lastPlayed.name]) {
+                highlightAlbumArt.style.backgroundImage = `url(${albumArtCache[lastPlayed.name]})`;
+                highlightAlbumArt.innerHTML = '';
+            }
+            recentHighlight.addEventListener('click', () => {
+                const songIndex = songs.findIndex(s => s.name === lastPlayed.name);
+                if (songIndex !== -1) playSong(songIndex);
+            });
+        }
+    }
+
+    function loadAlbums() {
+        console.log("Loading albums...");
+        const albumsMap = {};
+        songs.forEach(song => {
+            const album = albumDataCache[song.name]?.album || 'Unknown Album';
+            if (!albumsMap[album]) {
+                albumsMap[album] = [];
+            }
+            albumsMap[album].push(song);
+        });
+
+        albumsList.innerHTML = '';
+        for (const album in albumsMap) {
+            const albumSongs = albumsMap[album];
+            const card = document.createElement('div');
+            card.className = 'card';
+            const albumArt = albumArtCache[albumSongs[0].name] || '';
+            card.innerHTML = `
+                <div class="album-art" style="background-image: url(${albumArt})">${albumArt ? '' : '🎵'}</div>
+                <p>${album}</p>
+                <span>${albumSongs.length} Song${albumSongs.length > 1 ? 's' : ''}</span>
+            `;
+            card.addEventListener('click', () => {
+                loadLocalSongs(albumSongs);
+                document.querySelectorAll('.content section').forEach(section => section.classList.add('hidden'));
+                document.getElementById('localSongs').classList.remove('hidden');
+                document.querySelector('.tab.active')?.classList.remove('active');
+                document.querySelector('.tab[data-tab="songs"]').classList.add('active');
+            });
+            albumsList.appendChild(card);
+        }
     }
 
     function loadQueue() {
@@ -183,8 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.src = URL.createObjectURL(song);
         audioPlayer.play().then(() => {
             console.log("Song playing:", song.name);
-            playPauseBtn.textContent = '⏸️';
-            fullPlayPauseBtn.textContent = '⏸️';
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            fullPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
             miniSongName.textContent = song.name;
             miniArtist.textContent = 'Local File';
             fullSongName.textContent = song.name;
@@ -204,6 +269,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 fullAlbumArt.innerHTML = '🎵';
             }
 
+            // Update "Now Playing" highlight
+            loadLocalSongs(); // Reload to update "now-playing" class
+
             // Add to recently played
             if (!recentlyPlayed.some(s => s.name === song.name)) {
                 recentlyPlayed.unshift({ name: song.name });
@@ -215,6 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update queue
             queue = [...songs].splice(index);
             loadQueue();
+
+            // Update like button
+            if (favorites.includes(song.name)) {
+                likeBtn.classList.add('liked');
+                likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+            } else {
+                likeBtn.classList.remove('liked');
+                likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+            }
         }).catch(err => {
             console.error("Error playing song:", err);
             alert("Failed to play the song. Check the console for details.");
@@ -252,16 +329,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (audioPlayer.paused) {
             audioPlayer.play().then(() => {
                 console.log("Playing...");
-                playPauseBtn.textContent = '⏸️';
-                fullPlayPauseBtn.textContent = '⏸️';
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                fullPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
             }).catch(err => {
                 console.error("Error playing audio:", err);
             });
         } else {
             audioPlayer.pause();
             console.log("Paused...");
-            playPauseBtn.textContent = '▶️';
-            fullPlayPauseBtn.textContent = '▶️';
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            fullPlayPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         }
     }
 
@@ -278,18 +355,21 @@ document.addEventListener('DOMContentLoaded', () => {
         playSong(currentSongIndex);
     });
 
+    miniNextBtn.addEventListener('click', () => nextBtn.click());
+    miniPrevBtn.addEventListener('click', () => prevBtn.click());
+
     // Shuffle
     shuffleBtn.addEventListener('click', () => {
         console.log("Shuffle button clicked.");
         isShuffling = !isShuffling;
-        shuffleBtn.style.color = isShuffling ? getSeasonColor() : '#40c4ff';
+        shuffleBtn.style.color = isShuffling ? geetBox.getSeasonColor() : '#40c4ff';
     });
 
     // Repeat
     repeatBtn.addEventListener('click', () => {
         console.log("Repeat button clicked.");
         isRepeating = !isRepeating;
-        repeatBtn.style.color = isRepeating ? getSeasonColor() : '#40c4ff';
+        repeatBtn.style.color = isRepeating ? geetBox.getSeasonColor() : '#40c4ff';
         audioPlayer.loop = isRepeating;
     });
 
@@ -302,6 +382,16 @@ document.addEventListener('DOMContentLoaded', () => {
         duration.textContent = formatTime(audioPlayer.duration);
     });
 
+    // Progress Bar Click-to-Seek
+    function seek(event, progressBar) {
+        const rect = progressBar.getBoundingClientRect();
+        const pos = (event.clientX - rect.left) / rect.width;
+        audioPlayer.currentTime = pos * audioPlayer.duration;
+    }
+
+    miniProgressBar.addEventListener('click', (e) => seek(e, miniProgressBar));
+    fullProgressBar.addEventListener('click', (e) => seek(e, fullProgressBar));
+
     function formatTime(seconds) {
         if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
@@ -313,6 +403,20 @@ document.addEventListener('DOMContentLoaded', () => {
     volume.addEventListener('input', () => {
         console.log("Volume changed:", volume.value);
         audioPlayer.volume = volume.value;
+        if (audioPlayer.volume === 0) {
+            isMuted = true;
+            muteBtn.innerHTML = '<i class="fas fa-volume-off"></i>';
+        } else {
+            isMuted = false;
+            muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+        }
+    });
+
+    // Mute/Unmute
+    muteBtn.addEventListener('click', () => {
+        isMuted = !isMuted;
+        audioPlayer.volume = isMuted ? 0 : volume.value;
+        muteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-off"></i>' : '<i class="fas fa-volume-up"></i>';
     });
 
     // Speed
@@ -321,8 +425,25 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.playbackRate = parseFloat(speedSelect.value);
     });
 
+    // Like Button
+    likeBtn.addEventListener('click', () => {
+        const songName = songs[currentSongIndex]?.name;
+        if (!songName) return;
+        if (favorites.includes(songName)) {
+            favorites = favorites.filter(fav => fav !== songName);
+            likeBtn.classList.remove('liked');
+            likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+        } else {
+            favorites.push(songName);
+            likeBtn.classList.add('liked');
+            likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+        }
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    });
+
     // Full Player Toggle
-    miniPlayer.addEventListener('click', () => {
+    miniPlayer.addEventListener('click', (e) => {
+        if (e.target.closest('.mini-controls')) return; // Prevent opening full player when clicking controls
         console.log("Mini player clicked. Opening full player...");
         fullPlayer.classList.remove('hidden');
     });
