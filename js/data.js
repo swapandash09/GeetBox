@@ -29,9 +29,11 @@ window.geetBoxData = {
         const songsList = document.getElementById('songsList');
         songsList.innerHTML = filteredSongs.map((song, i) => `
             <div class="card" onclick="window.geetBox.playSong(URL.createObjectURL(${song}))">
-                <div class="album-art">${i + 1}</div>
-                <p>${song.name}</p>
-                <span>Local</span>
+                <div class="card-content">
+                    <div class="album-art">${i + 1}</div>
+                    <p>${song.name}</p>
+                    <span>Local</span>
+                </div>
             </div>
         `).join('');
     },
