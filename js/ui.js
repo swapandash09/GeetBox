@@ -1,4 +1,4 @@
-// UI/UX Enhancements for GeetBox
+// UI Enhancements for GeetBox
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content section');
@@ -6,8 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const lyricsSection = document.getElementById('lyricsSection');
     const visualizer = document.getElementById('visualizer');
     const audioPlayer = document.getElementById('audioPlayer');
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
+    const introScreen = document.getElementById('intro-screen');
+    const dashboard = document.getElementById('dashboard');
+
+    // Show intro screen if no songs are loaded
+    if (window.geetBoxData.songs.length === 0) {
+        introScreen.classList.remove('hidden');
+    } else {
+        dashboard.classList.remove('hidden');
+    }
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -24,10 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const ctx = visualizer.getContext('2d');
-    const analyser = new (window.AudioContext || window.webkitAudioContext).createAnalyser();
-    const source = new (window.AudioContext || window.webkitAudioContext).createMediaElementSource(audioPlayer);
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaElementSource(audioPlayer);
     source.connect(analyser);
-    analyser.connect(new (window.AudioContext || window.webkitAudioContext).destination);
+    analyser.connect(audioContext.destination);
     analyser.fftSize = 256;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -40,12 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let x = 0;
         for (let i = 0; i < bufferLength; i++) {
             const barHeight = dataArray[i] * 0.3;
-            ctx.fillStyle = '#ff9a76';
+            ctx.fillStyle = '#1DB954';
             ctx.fillRect(x, visualizer.height - barHeight, barWidth, barHeight);
             x += barWidth + 1;
         }
     }
     drawVisualizer();
-
-    settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidden'));
 });
