@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeetBox - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <!-- Add jsmediatags library for album art extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+</head>
+<body>
+    <!-- Main Music Player -->
+    <div id="player">
+        <header>
+            <button id="menuBtn">☰</button>
+            <h1>GeetBox</h1>
+            <button id="searchBtn">🔍</button>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchBar" class="hidden" placeholder="Search Your Beats...">
+            <ul id="searchSuggestions" class="hidden"></ul>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="suggested">Suggested</button>
+            <button class="tab" data-tab="songs">Songs</button>
+            <button class="tab" data-tab="albums">Albums</button>
+            <button class="tab" data-tab="artists">Artists</button>
+            <button class="tab" data-tab="playlists">Playlists</button>
+            <button class="tab" data-tab="queue">Queue</button>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="content">
+            <!-- Local Songs Playlist -->
+            <section id="localSongs">
+                <div class="section-header">
+                    <h2>My Songs</h2>
+                    <button id="addSongsBtn">Add Songs</button>
+                </div>
+                <input type="file" id="fileInput" accept="audio/*" multiple hidden>
+                <div class="scroll-container" id="localSongsList"></div>
+            </section>
+
+            <!-- Recently Played -->
+            <section id="recentlyPlayed">
+                <div class="section-header">
+                    <h2>Recently Played</h2>
+                    <a href="#" class="see-all">SEE ALL</a>
+                </div>
+                <div class="scroll-container" id="recentlyPlayedList"></div>
+            </section>
+
+            <!-- Now Playing Queue -->
+            <section id="queue" class="hidden">
+                <div class="section-header">
+                    <h2>Now Playing Queue</h2>
+                    <a href="#" class="see-all">CLEAR</a>
+                </div>
+                <div class="scroll-container" id="queueList"></div>
+            </section>
+        </div>
+
+        <!-- Mini Player -->
+        <div class="mini-player" id="miniPlayer">
+            <audio id="audioPlayer"></audio>
+            <div class="mini-player-content">
+                <div class="album-art-mini" id="miniAlbumArt">🎵</div>
+                <div class="song-info">
+                    <span id="miniSongName">Select a Song</span>
+                    <span id="miniArtist">Local File</span>
+                </div>
+                <button id="playPauseBtn">▶️</button>
+            </div>
+            <progress id="miniProgressBar" value="0" max="100"></progress>
+        </div>
+
+        <!-- Full-Screen Player -->
+        <div id="fullPlayer" class="hidden">
+            <div class="full-player-content">
+                <button id="closeFullPlayer">✖</button>
+                <button id="moreBtn" class="more-btn">⋮</button>
+                <div class="album-art-large" id="fullAlbumArt">🎵</div>
+                <div id="fullSongInfo">
+                    <span id="fullSongName">Select a Song</span>
+                    <span id="fullArtist">Local File</span>
+                </div>
+                <progress id="fullProgressBar" value="0" max="100"></progress>
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+                <div class="controls">
+                    <button id="shuffleBtn">🔀</button>
+                    <button id="prevBtn">⏮️</button>
+                    <button id="fullPlayPauseBtn">▶️</button>
+                    <button id="nextBtn">⏭️</button>
+                    <button id="repeatBtn">🔁</button>
+                </div>
+                <div class="extra-controls">
+                    <label>Volume: <input type="range" id="volume" min="0" max="1" step="0.1" value="1"></label>
+                    <label>Speed: 
+                        <select id="speedSelect">
+                            <option value="0.5">0.5x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="lyrics">
+                    <h4>Lyrics</h4>
+                    <p id="lyricsText">Lyrics will appear here...</p>
+                </div>
+                <canvas id="miniVisualizer" width="200" height="50"></canvas>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="hidden">
+            <h3>Settings</h3>
+            <label>Theme: 
+                <select id="themeSelect">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                </select>
+            </label>
+            <label>Season: 
+                <select id="seasonSelect">
+                    <option value="spring">Spring</option>
+                    <option value="summer">Summer</option>
+                    <option value="autumn">Autumn</option>
+                    <option value="winter">Winter</option>
+                </select>
+            </label>
+            <label>Sleep Timer: 
+                <select id="sleepTimer">
+                    <option value="0">Off</option>
+                    <option value="5">5 mins</option>
+                    <option value="10">10 mins</option>
+                    <option value="15">15 mins</option>
+                    <option value="30">30 mins</option>
+                </select>
+            </label>
+            <button id="voiceBtn">🎙️ Voice Control</button>
+        </div>
+
+        <!-- 3-Dot Menu -->
+        <div id="moreMenu" class="hidden">
+            <ul>
+                <li id="shareSong">Share Song</li>
+                <li id="addToPlaylist">Add to Playlist</li>
+                <li id="downloadSong">Download</li>
+                <li id="songDetails">Song Details</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="musicPlayer.js"></script>
+    <script src="features.js"></script>
+</body>
+</html>
