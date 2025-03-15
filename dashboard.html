@@ -11,159 +11,143 @@
 </head>
 <body>
     <div id="app">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="collapsed">
-            <div class="sidebar-header">
-                <h2>GeetBox</h2>
-                <button id="toggleSidebar"><i class="fas fa-bars"></i></button>
-            </div>
-            <nav>
-                <ul>
-                    <li class="nav-item active" data-tab="suggested"><i class="fas fa-star"></i> Suggested</li>
-                    <li class="nav-item" data-tab="songs"><i class="fas fa-music"></i> Songs</li>
-                    <li class="nav-item" data-tab="albums"><i class="fas fa-record-vinyl"></i> Albums</li>
-                    <li class="nav-item" data-tab="playlists"><i class="fas fa-list"></i> Playlists</li>
-                    <li class="nav-item" data-tab="queue"><i class="fas fa-list-ol"></i> Queue</li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main id="main-content">
-            <header>
-                <button id="menuBtn"><i class="fas fa-user"></i></button>
+        <header>
+            <h1>GeetBox</h1>
+            <div class="header-actions">
                 <input type="text" id="searchBar" placeholder="Search Your Beats...">
                 <button id="settingsBtn"><i class="fas fa-cog"></i></button>
-            </header>
+            </div>
+        </header>
+
+        <main id="main-content">
+            <div class="nav-circle">
+                <button class="nav-item active" data-tab="suggested"><i class="fas fa-star"></i><span>Suggested</span></button>
+                <button class="nav-item" data-tab="songs"><i class="fas fa-music"></i><span>Songs</span></button>
+                <button class="nav-item" data-tab="albums"><i class="fas fa-record-vinyl"></i><span>Albums</span></button>
+                <button class="nav-item" data-tab="playlists"><i class="fas fa-list"></i><span>Playlists</span></button>
+                <button class="nav-item" data-tab="queue"><i class="fas fa-list-ol"></i><span>Queue</span></button>
+            </div>
 
             <div class="content">
-                <!-- Suggested Section -->
                 <section id="suggested" class="active">
                     <div class="section-header">
                         <h2>Suggested</h2>
                     </div>
-                    <div class="scroll-container" id="suggestedList"></div>
+                    <div class="card-container" id="suggestedList"></div>
                 </section>
 
-                <!-- Songs Section -->
                 <section id="songs" class="hidden">
                     <div class="section-header">
                         <h2>My Songs</h2>
                         <button id="addSongsBtn">Add Songs <i class="fas fa-plus"></i></button>
                     </div>
                     <input type="file" id="fileInput" accept="audio/*" multiple hidden>
-                    <div class="scroll-container" id="songsList"></div>
+                    <div class="card-container" id="songsList"></div>
                 </section>
 
-                <!-- Albums Section -->
                 <section id="albums" class="hidden">
                     <div class="section-header">
                         <h2>Albums</h2>
                     </div>
-                    <div class="scroll-container" id="albumsList"></div>
+                    <div class="card-container" id="albumsList"></div>
                 </section>
 
-                <!-- Playlists Section -->
                 <section id="playlists" class="hidden">
                     <div class="section-header">
                         <h2>Playlists</h2>
-                        <button id="createPlaylistBtn">Create Playlist <i class="fas fa-plus"></i></button>
+                        <button id="createPlaylistBtn">New Playlist <i class="fas fa-plus"></i></button>
                     </div>
-                    <div class="scroll-container" id="playlistsList"></div>
+                    <div class="card-container" id="playlistsList"></div>
                 </section>
 
-                <!-- Queue Section -->
                 <section id="queue" class="hidden">
                     <div class="section-header">
                         <h2>Queue</h2>
                         <button id="clearQueueBtn">Clear <i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="scroll-container" id="queueList"></div>
+                    <div class="card-container" id="queueList"></div>
                 </section>
             </div>
-
-            <!-- Mini Player -->
-            <div class="mini-player" id="miniPlayer">
-                <audio id="audioPlayer"></audio>
-                <div class="mini-player-content">
-                    <div class="album-art-mini" id="miniAlbumArt"></div>
-                    <div class="song-info">
-                        <span id="miniSongName">Select a Song</span>
-                        <span id="miniArtist">Local File</span>
-                    </div>
-                    <div class="mini-controls">
-                        <button id="miniPrevBtn"><i class="fas fa-backward"></i></button>
-                        <button id="playPauseBtn"><i class="fas fa-play"></i></button>
-                        <button id="miniNextBtn"><i class="fas fa-forward"></i></button>
-                    </div>
-                </div>
-                <progress id="miniProgressBar" value="0" max="100"></progress>
-            </div>
-
-            <!-- Full Player -->
-            <div id="fullPlayer" class="hidden">
-                <div class="full-player-content">
-                    <button id="closeFullPlayer"><i class="fas fa-times"></i></button>
-                    <div class="album-art-large" id="fullAlbumArt"></div>
-                    <div id="fullSongInfo">
-                        <span id="fullSongName">Select a Song</span>
-                        <span id="fullArtist">Local File</span>
-                        <button id="likeBtn"><i class="far fa-heart"></i></button>
-                    </div>
-                    <progress id="fullProgressBar" value="0" max="100"></progress>
-                    <div class="time-info">
-                        <span id="currentTime">0:00</span>
-                        <span id="duration">0:00</span>
-                    </div>
-                    <div class="controls">
-                        <button id="shuffleBtn"><i class="fas fa-random"></i></button>
-                        <button id="prevBtn"><i class="fas fa-backward"></i></button>
-                        <button id="fullPlayPauseBtn"><i class="fas fa-play"></i></button>
-                        <button id="nextBtn"><i class="fas fa-forward"></i></button>
-                        <button id="repeatBtn"><i class="fas fa-redo"></i></button>
-                    </div>
-                    <div class="extra-controls">
-                        <label><i class="fas fa-volume-up"></i> <input type="range" id="volume" min="0" max="1" step="0.1" value="1"></label>
-                        <button id="muteBtn"><i class="fas fa-volume-mute"></i></button>
-                        <label>Speed: <select id="speedSelect">
-                            <option value="0.5">0.5x</option>
-                            <option value="1">1x</option>
-                            <option value="1.5">1.5x</option>
-                            <option value="2">2x</option>
-                        </select></label>
-                    </div>
-                    <button id="toggleLyricsBtn">Lyrics <i class="fas fa-chevron-down"></i></button>
-                    <div class="lyrics hidden" id="lyricsSection">
-                        <h4>Lyrics</h4>
-                        <p id="lyricsText">Lyrics will appear here...</p>
-                    </div>
-                    <canvas id="visualizer" width="300" height="50"></canvas>
-                </div>
-            </div>
-
-            <!-- Settings Panel -->
-            <div id="settingsPanel" class="hidden">
-                <h3>Settings</h3>
-                <label>Theme: <select id="themeSelect">
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                </select></label>
-                <label>Season: <select id="seasonSelect">
-                    <option value="spring">Spring</option>
-                    <option value="summer">Summer</option>
-                    <option value="autumn">Autumn</option>
-                    <option value="winter">Winter</option>
-                </select></label>
-                <label>Sleep Timer: <select id="sleepTimer">
-                    <option value="0">Off</option>
-                    <option value="5">5 mins</option>
-                    <option value="10">10 mins</option>
-                    <option value="15">15 mins</option>
-                    <option value="30">30 mins</option>
-                </select></label>
-                <button id="voiceBtn"><i class="fas fa-microphone"></i> Voice</button>
-            </div>
         </main>
+
+        <div class="mini-player" id="miniPlayer">
+            <audio id="audioPlayer"></audio>
+            <div class="mini-player-content">
+                <div class="album-art-mini" id="miniAlbumArt"></div>
+                <div class="song-info">
+                    <span id="miniSongName">Select a Song</span>
+                    <span id="miniArtist">Local File</span>
+                </div>
+                <div class="mini-controls">
+                    <button id="miniPrevBtn"><i class="fas fa-backward"></i></button>
+                    <button id="playPauseBtn"><i class="fas fa-play"></i></button>
+                    <button id="miniNextBtn"><i class="fas fa-forward"></i></button>
+                </div>
+            </div>
+            <progress id="miniProgressBar" value="0" max="100"></progress>
+        </div>
+
+        <div id="fullPlayer" class="hidden">
+            <div class="full-player-content">
+                <button id="closeFullPlayer"><i class="fas fa-times"></i></button>
+                <div class="album-art-large" id="fullAlbumArt"></div>
+                <div id="fullSongInfo">
+                    <span id="fullSongName">Select a Song</span>
+                    <span id="fullArtist">Local File</span>
+                    <button id="likeBtn"><i class="far fa-heart"></i></button>
+                </div>
+                <progress id="fullProgressBar" value="0" max="100"></progress>
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+                <div class="controls">
+                    <button id="shuffleBtn"><i class="fas fa-random"></i></button>
+                    <button id="prevBtn"><i class="fas fa-backward"></i></button>
+                    <button id="fullPlayPauseBtn"><i class="fas fa-play"></i></button>
+                    <button id="nextBtn"><i class="fas fa-forward"></i></button>
+                    <button id="repeatBtn"><i class="fas fa-redo"></i></button>
+                </div>
+                <div class="extra-controls">
+                    <label><i class="fas fa-volume-up"></i> <input type="range" id="volume" min="0" max="1" step="0.1" value="1"></label>
+                    <button id="muteBtn"><i class="fas fa-volume-mute"></i></button>
+                    <label>Speed: <select id="speedSelect">
+                        <option value="0.5">0.5x</option>
+                        <option value="1">1x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select></label>
+                </div>
+                <button id="toggleLyricsBtn">Lyrics <i class="fas fa-chevron-down"></i></button>
+                <div class="lyrics hidden" id="lyricsSection">
+                    <h4>Lyrics</h4>
+                    <p id="lyricsText">Lyrics will appear here...</p>
+                </div>
+                <canvas id="visualizer" width="300" height="50"></canvas>
+            </div>
+        </div>
+
+        <div id="settingsPanel" class="hidden">
+            <h3>Settings</h3>
+            <label>Theme: <select id="themeSelect">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+            </select></label>
+            <label>Season: <select id="seasonSelect">
+                <option value="spring">Spring</option>
+                <option value="summer">Summer</option>
+                <option value="autumn">Autumn</option>
+                <option value="winter">Winter</option>
+            </select></label>
+            <label>Sleep Timer: <select id="sleepTimer">
+                <option value="0">Off</option>
+                <option value="5">5 mins</option>
+                <option value="10">10 mins</option>
+                <option value="15">15 mins</option>
+                <option value="30">30 mins</option>
+            </select></label>
+            <button id="voiceBtn"><i class="fas fa-microphone"></i> Voice</button>
+        </div>
     </div>
 
     <script src="js/player.js"></script>
