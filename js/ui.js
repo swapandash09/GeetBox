@@ -1,20 +1,13 @@
 // UI/UX Enhancements for GeetBox
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const toggleSidebar = document.getElementById('toggleSidebar');
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content section');
-    const miniPlayer = document.getElementById('miniPlayer');
-    const fullPlayer = document.getElementById('fullPlayer');
-    const closeFullPlayer = document.getElementById('closeFullPlayer');
     const toggleLyricsBtn = document.getElementById('toggleLyricsBtn');
     const lyricsSection = document.getElementById('lyricsSection');
     const visualizer = document.getElementById('visualizer');
     const audioPlayer = document.getElementById('audioPlayer');
-
-    toggleSidebar.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-    });
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -24,12 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(item.dataset.tab).classList.remove('hidden');
         });
     });
-
-    miniPlayer.addEventListener('click', () => {
-        if (!event.target.closest('.mini-controls')) fullPlayer.classList.remove('hidden');
-    });
-
-    closeFullPlayer.addEventListener('click', () => fullPlayer.classList.add('hidden'));
 
     toggleLyricsBtn.addEventListener('click', () => {
         lyricsSection.classList.toggle('visible');
@@ -53,10 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let x = 0;
         for (let i = 0; i < bufferLength; i++) {
             const barHeight = dataArray[i] * 0.3;
-            ctx.fillStyle = '#ff6f61';
+            ctx.fillStyle = '#ff9a76';
             ctx.fillRect(x, visualizer.height - barHeight, barWidth, barHeight);
             x += barWidth + 1;
         }
     }
     drawVisualizer();
+
+    settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidden'));
 });
