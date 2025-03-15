@@ -8,6 +8,29 @@ body {
     position: relative;
     overflow-x: hidden;
     touch-action: manipulation;
+    animation: bgAnimation 15s infinite alternate;
+}
+
+@keyframes bgAnimation {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="10" y="90" font-size="80" fill="rgba(255, 111, 97, 0.1)">♫</text></svg>') repeat;
+    animation: floatNotes 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes floatNotes {
+    0% { background-position: 0 0; }
+    100% { background-position: 100% 100%; }
 }
 
 #intro {
@@ -111,6 +134,11 @@ header h1 {
     font-weight: 600;
     color: #ff6f61;
     text-shadow: 0 0 15px #ff6f61;
+    transition: color 0.3s;
+}
+
+header h1:hover {
+    color: #40c4ff;
 }
 
 #menuBtn, #searchBtn {
@@ -141,6 +169,11 @@ header h1 {
     box-shadow: 0 0 15px rgba(255, 111, 97, 0.5);
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
+    transition: box-shadow 0.3s;
+}
+
+#searchBar:focus {
+    box-shadow: 0 0 25px rgba(255, 111, 97, 0.8);
 }
 
 #searchBar::placeholder {
@@ -266,6 +299,17 @@ header h1 {
     animation: fadeIn 0.5s ease-in-out;
 }
 
+.card.now-playing {
+    border: 2px solid #ff6f61;
+    box-shadow: 0 0 20px #ff6f61;
+    animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 20px #ff6f61; }
+    100% { box-shadow: 0 0 30px #40c4ff; }
+}
+
 .card:hover {
     transform: translateY(-10px) rotate(2deg);
     box-shadow: 0 0 30px rgba(255, 111, 97, 0.7);
@@ -325,11 +369,32 @@ header h1 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .card span {
     font-size: 12px;
     color: #bbb;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.highlight-card {
+    flex: 0 0 auto;
+    width: 200px;
+    text-align: center;
+    background: linear-gradient(145deg, rgba(255, 111, 97, 0.3), rgba(64, 196, 255, 0.3));
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 2px solid #ff6f61;
+    box-shadow: 0 0 30px rgba(255, 111, 97, 0.7);
+}
+
+.highlight-card .album-art {
+    width: 150px;
+    height: 150px;
+    font-size: 60px;
 }
 
 .mini-player {
@@ -339,15 +404,16 @@ header h1 {
     transform: translateX(-50%);
     width: 100%;
     max-width: 450px;
-    background: linear-gradient(145deg, rgba(255, 111, 97, 0.2), rgba(64, 196, 255, 0.2));
-    backdrop-filter: blur(10px);
+    background: rgba(30, 30, 47, 0.5);
+    backdrop-filter: blur(15px);
     padding: 10px;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(255, 111, 97, 0.5);
+    border-top: 2px solid rgba(255, 111, 97, 0.5);
     box-shadow: 0 -5px 20px rgba(255, 111, 97, 0.5);
     cursor: pointer;
     z-index: 10;
+    border-radius: 15px 15px 0 0;
 }
 
 .mini-player-content {
@@ -384,21 +450,26 @@ header h1 {
 #miniArtist {
     font-size: 12px;
     color: #40c4ff;
+    text-shadow: 0 0 3px #40c4ff;
 }
 
-#playPauseBtn, #fullPlayPauseBtn {
+.mini-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.mini-controls button, .controls button {
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 20px;
     color: #ff6f61;
     cursor: pointer;
-    animation: pulse 1.5s infinite;
+    transition: transform 0.3s;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+.mini-controls button:hover, .controls button:hover {
+    transform: scale(1.2);
+    color: #40c4ff;
 }
 
 #miniProgressBar, #fullProgressBar {
@@ -407,6 +478,7 @@ header h1 {
     background: rgba(255, 255, 255, 0.2);
     accent-color: #ff6f61;
     box-shadow: 0 0 10px #ff6f61;
+    cursor: pointer;
 }
 
 #fullPlayer {
@@ -429,28 +501,28 @@ header h1 {
     padding: 20px;
     text-align: center;
     position: relative;
+    background: rgba(30, 30, 47, 0.5);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 111, 97, 0.5);
+}
+
+#closeFullPlayer, #moreBtn {
+    position: absolute;
+    top: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #ff6f61;
+    cursor: pointer;
 }
 
 #closeFullPlayer {
-    position: absolute;
-    top: 20px;
     right: 20px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #ff6f61;
-    cursor: pointer;
 }
 
 #moreBtn {
-    position: absolute;
-    top: 20px;
     left: 20px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #ff6f61;
-    cursor: pointer;
 }
 
 .album-art-large {
@@ -471,6 +543,7 @@ header h1 {
 
 #fullSongInfo {
     margin: 20px 0;
+    position: relative;
 }
 
 #fullSongName {
@@ -483,6 +556,23 @@ header h1 {
 #fullArtist {
     font-size: 16px;
     color: #40c4ff;
+    text-shadow: 0 0 5px #40c4ff;
+}
+
+.like-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #bbb;
+    cursor: pointer;
+}
+
+.like-btn.liked {
+    color: #ff6f61;
 }
 
 .time-info {
@@ -500,42 +590,61 @@ header h1 {
     margin: 20px 0;
 }
 
-.controls button {
-    background: none;
-    border: none;
-    font-size: 30px;
-    color: #40c4ff;
-    cursor: pointer;
-    transition: transform 0.3s;
-    touch-action: manipulation;
-}
-
-.controls button:hover {
-    transform: scale(1.2);
-}
-
 .extra-controls {
     margin: 20px 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .extra-controls label {
-    display: block;
-    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
     color: #bbb;
 }
 
 #volume {
-    width: 80%;
+    width: 100px;
     accent-color: #ff6f61;
 }
 
+#muteBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #ff6f61;
+    cursor: pointer;
+}
+
+.lyrics-toggle-btn {
+    background: linear-gradient(90deg, #ff6f61, #40c4ff);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 .lyrics {
-    margin: 20px 0;
     max-height: 150px;
     overflow-y: auto;
     background: rgba(255, 111, 97, 0.1);
     padding: 10px;
     border-radius: 10px;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+.lyrics.visible {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .lyrics h4 {
@@ -622,7 +731,7 @@ body.spring {
 
 body.spring .card { border-color: #76b041; }
 body.spring .controls button { color: #76b041; }
-body.spring #playPauseBtn, body.spring #fullPlayPauseBtn { color: #76b041; }
+body.spring .mini-controls button { color: #76b041; }
 body.spring .album-art-large { border-color: #76b041; }
 
 body.summer {
@@ -631,7 +740,7 @@ body.summer {
 
 body.summer .card { border-color: #ff6f61; }
 body.summer .controls button { color: #ff6f61; }
-body.summer #playPauseBtn, body.summer #fullPlayPauseBtn { color: #ff6f61; }
+body.summer .mini-controls button { color: #ff6f61; }
 body.summer .album-art-large { border-color: #ff6f61; }
 
 body.autumn {
@@ -640,7 +749,7 @@ body.autumn {
 
 body.autumn .card { border-color: #e76f51; }
 body.autumn .controls button { color: #e76f51; }
-body.autumn #playPauseBtn, body.autumn #fullPlayPauseBtn { color: #e76f51; }
+body.autumn .mini-controls button { color: #e76f51; }
 body.autumn .album-art-large { border-color: #e76f51; }
 
 body.winter {
@@ -649,7 +758,7 @@ body.winter {
 
 body.winter .card { border-color: #6096b4; }
 body.winter .controls button { color: #6096b4; }
-body.winter #playPauseBtn, body.winter #fullPlayPauseBtn { color: #6096b4; }
+body.winter .mini-controls button { color: #6096b4; }
 body.winter .album-art-large { border-color: #6096b4; }
 
 /* Light Theme */
@@ -700,6 +809,16 @@ body.light #searchBar {
         font-size: 10px;
     }
     
+    .highlight-card {
+        width: 150px;
+    }
+
+    .highlight-card .album-art {
+        width: 120px;
+        height: 120px;
+        font-size: 50px;
+    }
+    
     .album-art-large { 
         width: 150px; 
         height: 150px; 
@@ -735,4 +854,4 @@ body.light #searchBar {
         height: 30px;
         font-size: 16px;
     }
-}
+    }
