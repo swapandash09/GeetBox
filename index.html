@@ -2,83 +2,144 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeetBox - Welcome</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#121212">
+    <title>GeetBox</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 </head>
 <body>
-    <div id="intro">
-        <canvas id="waveCanvas"></canvas>
-        <div class="intro-content">
-            <div class="logo">
-                <svg viewBox="0 0 300 100" class="geetbox-logo">
-                    <g>
-                        <path d="M 50 50 Q 80 30, 110 50 T 170 50 T 230 50" fill="none" stroke="url(#gradient)" stroke-width="4"/>
-                        <text x="50" y="70" fill="none" stroke="url(#gradient)" stroke-width="2" font-family="Roboto Mono" font-size="40" font-weight="600">GeetBox</text>
-                    </g>
-                    <defs>
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color:#ff9a76"/>
-                            <stop offset="100%" style="stop-color:#a3e4d7"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
+    <div id="app">
+        <!-- Main Content -->
+        <main id="main-content">
+            <div id="intro-screen" class="hidden">
+                <div class="intro-content">
+                    <h1 class="logo">GeetBox</h1>
+                    <p class="tagline">Your Ultimate Music Experience</p>
+                    <button id="getStartedBtn" class="get-started-btn"><i class="fas fa-music"></i> Add Your Music</button>
+                    <input type="file" id="fileInputIntro" accept="audio/*" multiple hidden>
+                </div>
             </div>
-            <p class="tagline">Unleash Your Musical Journey</p>
-            <button id="getStartedBtn" class="get-started-btn"><i class="fas fa-play"></i> Get Started</button>
-            <input type="file" id="fileInput" accept="audio/*" multiple hidden>
-        </div>
+
+            <div id="dashboard" class="hidden">
+                <header>
+                    <h1>GeetBox</h1>
+                    <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+                </header>
+
+                <div class="content">
+                    <!-- Songs Section -->
+                    <section id="songs">
+                        <div class="section-header">
+                            <input type="text" id="searchBar" placeholder="Search Songs...">
+                            <button id="addSongsBtn"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <input type="file" id="fileInput" accept="audio/*" multiple hidden>
+                        <div class="card-container" id="songsList"></div>
+                    </section>
+                </div>
+
+                <!-- Mini Player -->
+                <div class="mini-player" id="miniPlayer">
+                    <audio id="audioPlayer"></audio>
+                    <div class="mini-player-content">
+                        <div class="album-art-mini" id="miniAlbumArt"></div>
+                        <div class="song-info">
+                            <span id="miniSongName">Select a Song</span>
+                            <span id="miniArtist">Unknown Artist</span>
+                        </div>
+                        <div class="mini-controls">
+                            <button id="playPauseBtn"><i class="fas fa-play"></i></button>
+                        </div>
+                    </div>
+                    <progress id="miniProgressBar" value="0" max="100"></progress>
+                </div>
+
+                <!-- Full Player -->
+                <div id="fullPlayer" class="hidden">
+                    <div class="full-player-content">
+                        <button id="closeFullPlayer"><i class="fas fa-chevron-down"></i></button>
+                        <div class="album-art-large" id="fullAlbumArt"></div>
+                        <div id="fullSongInfo">
+                            <span id="fullSongName">Select a Song</span>
+                            <span id="fullArtist">Unknown Artist</span>
+                            <button id="likeBtn"><i class="far fa-heart"></i></button>
+                        </div>
+                        <progress id="fullProgressBar" value="0" max="100"></progress>
+                        <div class="time-info">
+                            <span id="currentTime">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                        <div class="controls">
+                            <button id="shuffleBtn"><i class="fas fa-random"></i></button>
+                            <button id="prevBtn"><i class="fas fa-backward"></i></button>
+                            <button id="fullPlayPauseBtn"><i class="fas fa-play"></i></button>
+                            <button id="nextBtn"><i class="fas fa-forward"></i></button>
+                            <button id="repeatBtn"><i class="fas fa-redo"></i></button>
+                        </div>
+                        <div class="extra-controls">
+                            <label><i class="fas fa-volume-up"></i> <input type="range" id="volume" min="0" max="1" step="0.01" value="1"></label>
+                            <button id="muteBtn"><i class="fas fa-volume-mute"></i></button>
+                            <label>Speed: <select id="speedSelect">
+                                <option value="0.5">0.5x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                            </select></label>
+                        </div>
+                        <button id="toggleLyricsBtn">Lyrics <i class="fas fa-chevron-down"></i></button>
+                        <div class="lyrics hidden" id="lyricsSection">
+                            <h4>Lyrics</h4>
+                            <p id="lyricsText">Lyrics not available for this song.</p>
+                        </div>
+                        <canvas id="visualizer" width="300" height="50"></canvas>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div id="settingsPanel" class="hidden">
+                    <h3>Settings</h3>
+                    <label>Theme: <select id="themeSelect">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select></label>
+                    <label>Sleep Timer: <select id="sleepTimer">
+                        <option value="0">Off</option>
+                        <option value="5">5 mins</option>
+                        <option value="10">10 mins</option>
+                        <option value="15">15 mins</option>
+                        <option value="30">30 mins</option>
+                    </select></label>
+                    <button id="voiceBtn"><i class="fas fa-microphone"></i> Voice Control</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav">
+            <button class="nav-item active" data-tab="songs"><i class="fas fa-music"></i><span>Songs</span></button>
+            <button class="nav-item" data-tab="albums"><i class="fas fa-record-vinyl"></i><span>Albums</span></button>
+            <button class="nav-item" data-tab="playlists"><i class="fas fa-list"></i><span>Playlists</span></button>
+            <button class="nav-item" data-tab="queue"><i class="fas fa-list-ol"></i><span>Queue</span></button>
+        </nav>
     </div>
 
+    <script src="js/player.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/features.js"></script>
+    <script src="js/data.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const canvas = document.getElementById('waveCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            function drawWave() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.beginPath();
-                ctx.moveTo(0, canvas.height / 2);
-                for (let x = 0; x < canvas.width; x++) {
-                    ctx.lineTo(x, canvas.height / 2 + Math.sin(x * 0.02) * 50);
-                }
-                ctx.lineTo(canvas.width, canvas.height);
-                ctx.lineTo(0, canvas.height);
-                ctx.closePath();
-                ctx.fillStyle = 'rgba(255, 154, 118, 0.2)';
-                ctx.fill();
-                requestAnimationFrame(drawWave);
-            }
-            drawWave();
-
-            const logo = document.querySelector('.geetbox-logo');
-            logo.style.opacity = '0';
-            setTimeout(() => {
-                logo.style.transition = 'opacity 1.5s ease';
-                logo.style.opacity = '1';
-                setTimeout(() => {
-                    document.getElementById('getStartedBtn').style.opacity = '1';
-                    document.getElementById('getStartedBtn').style.transform = 'scale(1)';
-                }, 2000);
-            }, 500);
-
-            const getStartedBtn = document.getElementById('getStartedBtn');
-            getStartedBtn.addEventListener('click', () => {
-                document.getElementById('fileInput').click();
-                getStartedBtn.classList.add('clicked');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000); // Delay to show ripple effect
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+                console.log('Service Worker registered:', reg);
+            }).catch(err => {
+                console.error('Service Worker registration failed:', err);
             });
-
-            getStartedBtn.addEventListener('animationend', () => {
-                getStartedBtn.classList.remove('clicked');
-            });
-        });
+        }
     </script>
 </body>
 </html>
