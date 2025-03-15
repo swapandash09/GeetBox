@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullProgressBar = document.getElementById('fullProgressBar');
     const currentTime = document.getElementById('currentTime');
     const duration = document.getElementById('duration');
+    const miniPlayer = document.getElementById('miniPlayer');
+    const fullPlayer = document.getElementById('fullPlayer');
+    const closeFullPlayer = document.getElementById('closeFullPlayer');
 
     let isPlaying = false;
     let isShuffling = false;
@@ -87,6 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     miniProgressBar.addEventListener('click', (e) => geetBox.seek(e, miniProgressBar));
     fullProgressBar.addEventListener('click', (e) => geetBox.seek(e, fullProgressBar));
+
+    miniPlayer.addEventListener('click', () => {
+        if (!event.target.closest('.mini-controls')) fullPlayer.classList.remove('hidden');
+    });
+
+    closeFullPlayer.addEventListener('click', () => fullPlayer.classList.add('hidden'));
 
     function formatTime(seconds) {
         if (isNaN(seconds)) return '0:00';
