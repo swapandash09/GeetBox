@@ -10,39 +10,73 @@
 </head>
 <body>
     <div id="intro">
-        <div class="logo">
-            <svg viewBox="0 0 300 100" class="geetbox-logo">
-                <g>
-                    <path d="M 50 50 Q 80 30, 110 50 T 170 50 T 230 50" fill="none" stroke="url(#gradient)" stroke-width="3"/>
-                    <text x="50" y="70" fill="none" stroke="url(#gradient)" stroke-width="2" font-family="Roboto Mono" font-size="40" font-weight="600">GeetBox</text>
-                </g>
-                <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style="stop-color:#ff6f61"/>
-                        <stop offset="100%" style="stop-color:#40c4ff"/>
-                    </linearGradient>
-                </defs>
-            </svg>
+        <canvas id="waveCanvas"></canvas>
+        <div class="intro-content">
+            <div class="logo">
+                <svg viewBox="0 0 300 100" class="geetbox-logo">
+                    <g>
+                        <path d="M 50 50 Q 80 30, 110 50 T 170 50 T 230 50" fill="none" stroke="url(#gradient)" stroke-width="4"/>
+                        <text x="50" y="70" fill="none" stroke="url(#gradient)" stroke-width="2" font-family="Roboto Mono" font-size="40" font-weight="600">GeetBox</text>
+                    </g>
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#ff9a76"/>
+                            <stop offset="100%" style="stop-color:#a3e4d7"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <p class="tagline">Unleash Your Musical Journey</p>
+            <button id="getStartedBtn" class="get-started-btn"><i class="fas fa-play"></i> Get Started</button>
+            <input type="file" id="fileInput" accept="audio/*" multiple hidden>
         </div>
-        <p class="tagline">Experience Your Music in Style</p>
-        <button id="enterBtn" class="enter-btn"><i class="fas fa-play"></i> Enter GeetBox</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            function drawWave() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height / 2);
+                for (let x = 0; x < canvas.width; x++) {
+                    ctx.lineTo(x, canvas.height / 2 + Math.sin(x * 0.02) * 50);
+                }
+                ctx.lineTo(canvas.width, canvas.height);
+                ctx.lineTo(0, canvas.height);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(255, 154, 118, 0.2)';
+                ctx.fill();
+                requestAnimationFrame(drawWave);
+            }
+            drawWave();
+
             const logo = document.querySelector('.geetbox-logo');
             logo.style.opacity = '0';
             setTimeout(() => {
-                logo.style.transition = 'opacity 1s';
+                logo.style.transition = 'opacity 1.5s ease';
                 logo.style.opacity = '1';
                 setTimeout(() => {
-                    document.getElementById('enterBtn').style.opacity = '1';
-                    document.getElementById('enterBtn').style.transform = 'translateY(0)';
+                    document.getElementById('getStartedBtn').style.opacity = '1';
+                    document.getElementById('getStartedBtn').style.transform = 'scale(1)';
                 }, 2000);
             }, 500);
 
-            document.getElementById('enterBtn').addEventListener('click', () => {
-                window.location.href = 'dashboard.html';
+            const getStartedBtn = document.getElementById('getStartedBtn');
+            getStartedBtn.addEventListener('click', () => {
+                document.getElementById('fileInput').click();
+                getStartedBtn.classList.add('clicked');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000); // Delay to show ripple effect
+            });
+
+            getStartedBtn.addEventListener('animationend', () => {
+                getStartedBtn.classList.remove('clicked');
             });
         });
     </script>
