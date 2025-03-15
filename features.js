@@ -26,9 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextBtn = document.getElementById('nextBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
     const repeatBtn = document.getElementById('repeatBtn');
+    const toggleLyricsBtn = document.getElementById('toggleLyricsBtn');
+    const lyricsSection = document.getElementById('lyricsSection');
 
     let playlists = JSON.parse(localStorage.getItem('playlists')) || [];
     let currentSeason = 'spring';
+    let isLyricsVisible = false;
 
     // Visualizer Setup
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -134,8 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (minutes > 0) {
             sleepTimeout = setTimeout(() => {
                 audioPlayer.pause();
-                document.getElementById('playPauseBtn').textContent = '▶️';
-                document.getElementById('fullPlayPauseBtn').textContent = '▶️';
+                document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-play"></i>';
+                document.getElementById('fullPlayPauseBtn').innerHTML = '<i class="fas fa-play"></i>';
                 sleepTimer.value = '0';
                 alert("Sleep timer ended. Playback paused.");
             }, minutes * 60 * 1000);
@@ -209,6 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         alert(details);
         moreMenu.classList.add('hidden');
+    });
+
+    // Slide-to-Lyrics Toggle
+    toggleLyricsBtn.addEventListener('click', () => {
+        isLyricsVisible = !isLyricsVisible;
+        lyricsSection.classList.toggle('visible', isLyricsVisible);
+        toggleLyricsBtn.innerHTML = `Lyrics <i class="fas fa-chevron-${isLyricsVisible ? 'up' : 'down'}"></i>`;
     });
 
     // Keyboard Shortcuts
