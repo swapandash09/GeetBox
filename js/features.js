@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBar = document.getElementById('searchBar');
     const addSongsBtn = document.getElementById('addSongsBtn');
     const fileInput = document.getElementById('fileInput');
-    const settingsBtn = document.getElementById('settingsBtn');
     const settingsPanel = document.getElementById('settingsPanel');
     const themeSelect = document.getElementById('themeSelect');
     const seasonSelect = document.getElementById('seasonSelect');
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fileInput.addEventListener('change', () => {
         const songs = Array.from(fileInput.files);
-        console.log('Songs loaded:', songs);
         window.geetBoxData.loadSongs(songs);
     });
 
@@ -25,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtered = window.geetBoxData.filterSongs(query);
         window.geetBoxData.updateUI(filtered);
     });
-
-    settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidden'));
 
     themeSelect.addEventListener('change', () => {
         document.body.className = themeSelect.value;
