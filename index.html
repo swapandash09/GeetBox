@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeetBox - Welcome</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="intro">
+        <div class="logo">
+            <svg viewBox="0 0 300 100" class="geetbox-logo">
+                <g>
+                    <path d="M 50 50 Q 80 30, 110 50 T 170 50 T 230 50" fill="none" stroke="url(#gradient)" stroke-width="3"/>
+                    <text x="50" y="70" fill="none" stroke="url(#gradient)" stroke-width="2" font-family="Roboto Mono" font-size="40" font-weight="600">GeetBox</text>
+                </g>
+                <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#ff6f61"/>
+                        <stop offset="100%" style="stop-color:#40c4ff"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+        <p class="tagline">Unlock Your Music</p>
+        <button id="enterBtn" class="enter-btn">Enter GeetBox</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logo = document.querySelector('.geetbox-logo');
+            logo.style.opacity = '0';
+            setTimeout(() => {
+                logo.style.transition = 'opacity 1s';
+                logo.style.opacity = '1';
+                setTimeout(() => {
+                    document.getElementById('enterBtn').style.opacity = '1';
+                    document.getElementById('enterBtn').style.transform = 'translateY(0)';
+                }, 2000);
+            }, 500);
+
+            document.getElementById('enterBtn').addEventListener('click', () => {
+                window.location.href = 'dashboard.html';
+            });
+        });
+    </script>
+</body>
+</html>
